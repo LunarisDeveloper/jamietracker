@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jamie Tracker</title>
+<style>
+:root{--bg:#0b0b14;--panel:#10101c;--line:#1d1d2e;--tx:#e8e8f2;--mu:#8a8aa3;--ac:#e0457b;--ac2:#2a1a2a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,Segoe UI,sans-serif;height:100vh;display:flex;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+aside{width:280px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0}
+.brand{padding:14px 16px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.secsel{margin:0 14px 10px;display:flex;gap:6px}
+.secsel button{flex:1;padding:8px;border:1px solid var(--line);background:#0e0e1a;border-radius:8px;cursor:pointer;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.secsel button.on{background:var(--ac2);border-color:var(--ac)}
+.eras{flex:1;overflow:auto;padding:0 8px 8px}
+.era{display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;cursor:pointer;position:relative}
+.era:hover{background:#171727}.era.on{background:#2a1a2a}
+.era img,.era .ph{width:40px;height:40px;border-radius:5px;object-fit:cover;background:#1d1d2e;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mu);flex-shrink:0}
+.era b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+.era small{color:var(--mu);font-size:11px}
+.era .x{position:absolute;right:6px;top:6px;display:none;font-size:11px;color:var(--mu);cursor:pointer;background:none;border:0}
+.era:hover .x{display:block}
+.sbtn{margin:6px 14px;padding:9px;border-radius:8px;border:1px dashed var(--line);background:none;cursor:pointer;color:var(--mu)}
+.sbtn:hover{color:var(--tx);border-color:var(--ac)}
+.sbtn.lk{border-style:solid;font-size:12px}
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+.bar{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+.bar input,.bar select{background:#0e0e1a;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.bar input[type=search]{flex:1;min-width:160px}
+.pri{background:var(--ac);border:0;color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600}
+.gh{background:#16162a;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.cnt{color:var(--mu);font-size:12px}
+.list{flex:1;overflow:auto}
+.row{display:flex;gap:16px;padding:16px;border-bottom:1px solid var(--line)}
+.row:hover{background:#0f0f1b}
+.cov{width:64px;height:64px;border-radius:6px;object-fit:cover;background:#1d1d2e;flex-shrink:0}
+.info{flex:1;min-width:0}
+.info h3{margin:0;font-size:16px}
+.sub{color:var(--mu);font-size:12px}
+.era-t{color:#e5534b;font-size:11px;margin:2px 0 6px}
+.notes{color:#c9c9dc;white-space:pre-wrap;max-width:700px}
+.info a{color:var(--ac);font-size:12px;font-weight:600;text-decoration:none}
+.meta{display:flex;gap:14px;align-items:flex-start;flex-shrink:0}
+.meta .len{width:44px;color:var(--mu);padding-top:4px}
+.tag{font-size:11px;padding:2px 8px;border-radius:5px;border:1px solid var(--line);background:#16162a;white-space:nowrap}
+.t-full,.t-high{background:#12301f;border-color:#1f6b3a;color:#7ee2a3}
+.t-snip{background:#241a45;border-color:#4a35a0;color:#b5a2ff}
+.t-low,.t-rec{background:#3a1a14;border-color:#8a3a26;color:#ffb199}
+.col{display:flex;flex-direction:column;gap:6px;width:110px}
+.act{display:flex;gap:10px;margin-top:6px}
+.act button{background:none;border:0;color:var(--mu);cursor:pointer;font-size:12px;padding:0}
+.act button:hover{color:var(--tx)}
+.empty{padding:60px;text-align:center;color:var(--mu)}
+#player{display:none;border-top:1px solid var(--line);padding:8px 16px;background:var(--panel);align-items:center;gap:12px}
+#player audio{flex:1}
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:9}
+.modal.on{display:flex}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;width:min(520px,94vw);max-height:92vh;overflow:auto}
+.box h2{margin:0 0 12px;font-size:17px}
+.box label{display:block;font-size:12px;color:var(--mu);margin:10px 0 3px}
+.box input,.box select,.box textarea{width:100%;background:#0e0e1a;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.box textarea{min-height:80px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;align-items:center}
+.err{color:#ff8a80;font-size:12px;margin-top:8px;min-height:16px}
+.lnk{background:none;border:0;color:var(--mu);cursor:pointer;font-size:12px;margin-right:auto;text-decoration:underline}
+#toast{position:fixed;bottom:16px;right:16px;background:var(--panel);border:1px solid var(--ac);border-radius:8px;padding:8px 14px;display:none;z-index:20}
+@media(max-width:800px){aside{width:200px}.col,.meta .len{display:none}}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand"><span>Jamie Tracker</span><button class="gh adm" id="ren" title="Rename sections">✎</button></div>
+  <div class="secsel" id="secsel"></div>
+  <div class="eras" id="eras"></div>
+  <button class="sbtn adm" id="addAlbum">+ Add album</button>
+  <button class="sbtn lk" id="adminBtn">Admin</button>
+</aside>
+<main>
+  <div class="bar">
+    <input type="search" id="q" placeholder="Search tracks (title, notes)...">
+    <select id="fa"></select>
+    <select id="fq"></select>
+    <button class="pri adm" id="addTrack">+ Add track</button>
+    <span class="cnt" id="cnt"></span>
+  </div>
+  <div class="list" id="list"></div>
+  <div id="player"><b id="pt"></b><audio id="au" controls></audio><button class="gh" id="pc">✕</button></div>
+</main>
+<div class="modal" id="m"><div class="box" id="mb"></div></div>
+<div id="toast"></div>
+
+<script>
+const AV=["Full","Snippet","Partial","Confirmed","Tagged","Rumored"];
+const QU=["High Quality","CD Quality","Low Quality","Recording","Not Available"];
+const tagCls=v=>({Full:"t-full","High Quality":"t-high","CD Quality":"t-high",Snippet:"t-snip","Low Quality":"t-low",Recording:"t-rec"}[v]||"");
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const enc=new TextEncoder(),dec=new TextDecoder();
+const u8b64=u=>{let s="";for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)};
+const b64u8=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const opts=(el,arr,ph)=>el.innerHTML=`<option value="">${ph}</option>`+arr.map(x=>`<option>${x}</option>`).join("");
+opts($("#fa"),AV,"Availability");opts($("#fq"),QU,"Quality");
+
+let S={sections:[{id:"a",name:"Unreleased"},{id:"b",name:"Released"}],albums:[],tracks:[]};
+let sec="a",era="all",TOKEN=null,C=null,admin=false,curUrl=null;
+const PV={}; // local previews for freshly uploaded files (Pages takes ~1 min to deploy)
+const src=p=>p?(PV[p]||p):"";
+
+/* ---------- crypto: token encrypted with admin password (PBKDF2 + AES-GCM) ---------- */
+const KEY="jt_admin_v1";
+async function dk(pw,salt){const m=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:250000,hash:"SHA-256"},m,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function seal(pw,obj){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},await dk(pw,salt),enc.encode(JSON.stringify(obj))));return JSON.stringify({s:u8b64(salt),i:u8b64(iv),c:u8b64(ct)})}
+async function unseal(pw,str){const o=JSON.parse(str);return JSON.parse(dec.decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64u8(o.i)},await dk(pw,b64u8(o.s)),b64u8(o.c))))}
+
+/* ---------- GitHub API ---------- */
+const api=p=>`https://api.github.com/repos/${C.owner}/${C.repo}/contents/${p.split("/").map(encodeURIComponent).join("/")}`;
+const gh=(url,o={})=>fetch(url,{...o,headers:{Authorization:"Bearer "+TOKEN,Accept:"application/vnd.github+json",...(o.headers||{})}});
+async function getSha(p){const r=await gh(api(p)+"?ref="+C.branch+"&t="+Date.now());if(r.status===404)return null;if(!r.ok)throw new Error("GitHub "+r.status);return(await r.json()).sha}
+async function put(p,b64,msg){const sha=await getSha(p);const r=await gh(api(p),{method:"PUT",body:JSON.stringify({message:msg,content:b64,branch:C.branch,...(sha?{sha}:{})})});if(!r.ok)throw new Error((await r.json()).message||r.status)}
+async function del(p){if(!p)return;try{const sha=await getSha(p);if(sha)await gh(api(p),{method:"DELETE",body:JSON.stringify({message:"Delete "+p,sha,branch:C.branch})})}catch(e){}}
+const saveData=()=>put("data.json",u8b64(enc.encode(JSON.stringify(S,null,1))),"Update tracker");
+async function loadAdminData(){const r=await gh(api("data.json")+"?ref="+C.branch+"&t="+Date.now());if(r.ok){const j=await r.json();S=JSON.parse(dec.decode(b64u8(j.content)))}}
+async function loadPublic(){try{const r=await fetch("data.json?t="+Date.now());if(r.ok)S=await r.json()}catch(e){}}
+
+const toast=(t,ms)=>{const e=$("#toast");e.textContent=t;e.style.display="block";if(ms)setTimeout(()=>e.style.display="none",ms)};
+async function run(fn){toast("Saving to GitHub...");try{await fn();toast("Saved ✓ (site updates in ~1 min)",2500)}catch(e){toast("Error: "+e.message,6000)}render()}
+
+/* ---------- helpers ---------- */
+const albums=()=>S.albums.filter(a=>a.sec===sec);
+const tracks=()=>S.tracks.filter(t=>t.sec===sec);
+const albumById=id=>S.albums.find(a=>a.id===id);
+function readCover(f){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const c=document.createElement("canvas"),k=Math.min(1,300/Math.max(i.width,i.height));c.width=i.width*k;c.height=i.height*k;c.getContext("2d").drawImage(i,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.85))};i.src=r.result};r.readAsDataURL(f)})}
+const fileB64=async f=>u8b64(new Uint8Array(await f.arrayBuffer()));
+const ext=f=>(f.name.match(/\.[a-z0-9]+$/i)||[".bin"])[0].toLowerCase();
+
+/* ---------- render ---------- */
+function render(){
+  document.querySelectorAll(".adm").forEach(e=>e.style.display=admin?"":"none");
+  $("#adminBtn").textContent=admin?"Logout (admin)":"Admin";
+  $("#secsel").innerHTML=S.sections.map(s=>`<button class="${s.id===sec?"on":""}" data-s="${s.id}">${esc(s.name)}</button>`).join("");
+  const T=tracks();
+  $("#eras").innerHTML=`<div class="era ${era==="all"?"on":""}" data-e="all"><div class="ph">All</div><div><b>All Albums</b><small>${T.length} entries</small></div></div>`+
+    albums().map(a=>`<div class="era ${era===a.id?"on":""}" data-e="${a.id}">${a.cover?`<img src="${esc(src(a.cover))}">`:`<div class="ph">♪</div>`}<div><b>${esc(a.name)}</b><small>${T.filter(t=>t.album===a.id).length} entries</small></div>${admin?`<button class="x" data-del="${a.id}">✕</button>`:""}</div>`).join("");
+  const q=$("#q").value.toLowerCase(),fa=$("#fa").value,fq=$("#fq").value;
+  const L=T.filter(t=>(era==="all"||t.album===era)&&(!fa||t.avail===fa)&&(!fq||t.quality===fq)&&(!q||(t.title+" "+t.sub+" "+t.notes).toLowerCase().includes(q))).sort((a,b)=>a.title.localeCompare(b.title));
+  $("#cnt").textContent=`${L.length} / ${T.length}`;
+  $("#list").innerHTML=L.length?L.map(t=>{const a=albumById(t.album);return `<div class="row">
+    ${a&&a.cover?`<img class="cov" src="${esc(src(a.cover))}">`:`<div class="cov"></div>`}
+    <div class="info"><h3>${esc(t.title)}</h3>${t.sub?`<div class="sub">${esc(t.sub)}</div>`:""}${a?`<div class="era-t">● ${esc(a.name)}</div>`:""}
+    ${t.notes?`<div class="notes">${esc(t.notes)}</div>`:""}
+    ${/^https?:\/\//.test(t.link||"")?`<div><a href="${esc(t.link)}" target="_blank" rel="noopener">↗ ${esc(t.link.replace(/^https?:\/\/(www\.)?/,"").split("/")[0])}</a></div>`:""}
+    <div class="act">${t.audio?`<button data-play="${t.id}">▶ Play</button>`:""}${admin?`<button data-edit="${t.id}">Edit</button><button data-rm="${t.id}">Delete</button>`:""}</div></div>
+    <div class="meta"><div class="len">${esc(t.length)}</div>
+    <div class="col">${t.avail?`<span class="tag ${tagCls(t.avail)}">${esc(t.avail)}</span>`:""}</div>
+    <div class="col">${t.quality?`<span class="tag ${tagCls(t.quality)}">${esc(t.quality)}</span>`:""}</div>
+    <div class="col" style="color:var(--mu);font-size:11px">${esc(t.date)}</div></div></div>`}).join(""):`<div class="empty">No tracks yet.</div>`;
+}
+
+/* ---------- modal ---------- */
+const openM=h=>{$("#mb").innerHTML=h;$("#m").classList.add("on")};
+const closeM=()=>$("#m").classList.remove("on");
+$("#m").onclick=e=>{if(e.target.id==="m")closeM()};
+
+/* ---------- admin auth ---------- */
+function detect(){const o=location.hostname.endsWith("github.io")?location.hostname.split(".")[0]:"";const p=location.pathname.split("/")[1];return{owner:o,repo:p&&!p.includes(".")?p:(o?o+".github.io":""),branch:"main"}}
+function adminForm(){localStorage.getItem(KEY)?loginForm():setupForm()}
+function setupForm(){
+  const d=detect();
+  openM(`<h2>Set up admin</h2>
+  <p class="sub">Your token is encrypted with the password below and stored only in this browser. Create a fine-grained token limited to this repo with Contents: Read and write.</p>
+  <label>GitHub token</label><input id="s_tok" type="password" autocomplete="off">
+  <div class="two"><div><label>Owner</label><input id="s_own" value="${esc(d.owner)}"></div><div><label>Repo</label><input id="s_rep" value="${esc(d.repo)}"></div></div>
+  <label>Branch</label><input id="s_br" value="${d.branch}">
+  <label>Admin password</label><input id="s_pw" type="password" autocomplete="new-password">
+  <label>Confirm password</label><input id="s_pw2" type="password" autocomplete="new-password">
+  <div class="err" id="err"></div>
+  <div class="btns"><button class="gh" onclick="closeM()">Cancel</button><button class="pri" id="ok">Save & log in</button></div>`);
+  $("#ok").onclick=async()=>{
+    const cfg={owner:$("#s_own").value.trim(),repo:$("#s_rep").value.trim(),branch:$("#s_br").value.trim()||"main"},tok=$("#s_tok").value.trim(),pw=$("#s_pw").value;
+    const e=m=>$("#err").textContent=m;
+    if(!tok||!cfg.owner||!cfg.repo)return e("Fill in token, owner and repo.");
+    if(pw.length<8)return e("Password must be at least 8 characters.");
+    if(pw!==$("#s_pw2").value)return e("Passwords don't match.");
+    e("Checking token...");
+    try{const r=await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}`,{headers:{Authorization:"Bearer "+tok}});
+      if(!r.ok)return e("Token can't access that repo ("+r.status+").");
+      if(!(await r.json()).permissions?.push)return e("Token needs write access (Contents: Read and write).");
+      localStorage.setItem(KEY,await seal(pw,{tok,...cfg}));
+      await enter(tok,cfg)}catch(x){e("Error: "+x.message)}
+  };
+}
+function loginForm(){
+  openM(`<h2>Admin login</h2><label>Password</label><input id="l_pw" type="password" autocomplete="current-password">
+  <div class="err" id="err"></div>
+  <div class="btns"><button class="lnk" id="rs">Reset admin</button><button class="gh" onclick="closeM()">Cancel</button><button class="pri" id="ok">Log in</button></div>`);
+  $("#l_pw").focus();
+  const go=async()=>{$("#err").textContent="Decrypting...";
+    try{const o=await unseal($("#l_pw").value,localStorage.getItem(KEY));await enter(o.tok,{owner:o.owner,repo:o.repo,branch:o.branch})}
+    catch(e){$("#err").textContent="Wrong password."}};
+  $("#ok").onclick=go;$("#l_pw").onkeydown=e=>{if(e.key==="Enter")go()};
+  $("#rs").onclick=()=>{if(confirm("Delete the saved admin token from this browser? You'll need to set it up again.")){localStorage.removeItem(KEY);setupForm()}};
+}
+async function enter(tok,cfg){TOKEN=tok;C=cfg;admin=true;closeM();toast("Loading...");try{await loadAdminData()}catch(e){}toast("",1);$("#toast").style.display="none";render()}
+function logout(){TOKEN=null;C=null;admin=false;render();loadPublic().then(render)}
+$("#adminBtn").onclick=()=>admin?logout():adminForm();
+
+/* ---------- admin forms ---------- */
+function trackForm(id){
+  const t=S.tracks.find(x=>x.id===id)||{};
+  const op=(arr,v)=>`<option value="">—</option>`+arr.map(x=>`<option ${x===v?"selected":""}>${x}</option>`).join("");
+  openM(`<h2>${id?"Edit":"Add"} track</h2>
+  <label>Title</label><input id="f_title" value="${esc(t.title)}">
+  <label>Credits / subtitle</label><input id="f_sub" value="${esc(t.sub)}">
+  <label>Album</label><select id="f_album"><option value="">None</option>${albums().map(a=>`<option value="${a.id}" ${a.id===(t.album||(era!=="all"?era:""))?"selected":""}>${esc(a.name)}</option>`).join("")}</select>
+  <div class="two"><div><label>Availability</label><select id="f_avail">${op(AV,t.avail)}</select></div><div><label>Quality</label><select id="f_quality">${op(QU,t.quality)}</select></div></div>
+  <div class="two"><div><label>Length</label><input id="f_length" placeholder="3:34" value="${esc(t.length)}"></div><div><label>Date</label><input id="f_date" placeholder="Leaked Oct 5, 2026" value="${esc(t.date)}"></div></div>
+  <label>Notes</label><textarea id="f_notes">${esc(t.notes)}</textarea>
+  <label>Source link</label><input id="f_link" placeholder="https://" value="${esc(t.link)}">
+  <label>Audio file ${t.audio?"(replace)":""}</label><input type="file" id="f_audio" accept="audio/*">
+  <div class="btns"><button class="gh" onclick="closeM()">Cancel</button><button class="pri" id="ok">Save</button></div>`);
+  $("#ok").onclick=()=>{
+    const title=$("#f_title").value.trim();if(!title)return $("#f_title").focus();
+    const f=$("#f_audio").files[0];
+    if(f&&f.size>50*1024*1024)return alert("Audio file is over 50 MB — too large for the GitHub API.");
+    const v={title,sub:$("#f_sub").value,album:$("#f_album").value,avail:$("#f_avail").value,quality:$("#f_quality").value,length:$("#f_length").value,date:$("#f_date").value,notes:$("#f_notes").value,link:$("#f_link").value.trim()};
+    closeM();
+    run(async()=>{
+      const o=t.id?t:{id:uid(),sec};const old=o.audio;
+      if(f){const p="media/"+o.id+"-"+Date.now()+ext(f);await put(p,await fileB64(f),"Add audio");PV[p]=URL.createObjectURL(f);o.audio=p;o.audioName=f.name;if(old&&old!==p)await del(old)}
+      Object.assign(o,v);if(!t.id)S.tracks.push(o);
+      await saveData();
+    });
+  };
+}
+function albumForm(){
+  openM(`<h2>Add album</h2><label>Name</label><input id="a_name"><label>Cover</label><input type="file" id="a_cover" accept="image/*">
+  <div class="btns"><button class="gh" onclick="closeM()">Cancel</button><button class="pri" id="ok">Add</button></div>`);
+  $("#ok").onclick=()=>{const name=$("#a_name").value.trim();if(!name)return;const f=$("#a_cover").files[0];closeM();
+    run(async()=>{const a={id:uid(),sec,name,cover:""};
+      if(f){const d=await readCover(f);a.cover="covers/"+a.id+".jpg";await put(a.cover,d.split(",")[1],"Add cover");PV[a.cover]=d}
+      S.albums.push(a);await saveData()})};
+}
+function renameForm(){
+  openM(`<h2>Rename sections</h2>${S.sections.map((s,i)=>`<label>Section ${i+1}</label><input id="r${i}" value="${esc(s.name)}">`).join("")}
+  <div class="btns"><button class="gh" onclick="closeM()">Cancel</button><button class="pri" id="ok">Save</button></div>`);
+  $("#ok").onclick=()=>{const n=S.sections.map((s,i)=>$("#r"+i).value.trim()||s.name);closeM();run(async()=>{S.sections.forEach((s,i)=>s.name=n[i]);await saveData()})};
+}
+
+/* ---------- events ---------- */
+$("#addTrack").onclick=()=>trackForm();
+$("#addAlbum").onclick=albumForm;
+$("#ren").onclick=renameForm;
+["q","fa","fq"].forEach(i=>$("#"+i).addEventListener("input",render));
+$("#secsel").onclick=e=>{const b=e.target.closest("[data-s]");if(b){sec=b.dataset.s;era="all";render()}};
+$("#eras").onclick=e=>{
+  const d=e.target.closest("[data-del]");
+  if(d){if(admin&&confirm("Delete this album? Its tracks stay but lose the album.")){const id=d.dataset.del,a=albumById(id);run(async()=>{S.albums=S.albums.filter(x=>x.id!==id);S.tracks.forEach(t=>{if(t.album===id)t.album=""});if(era===id)era="all";await saveData();await del(a&&a.cover)})}return}
+  const x=e.target.closest("[data-e]");if(x){era=x.dataset.e;render()}
+};
+$("#list").onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.play){const t=S.tracks.find(x=>x.id===b.dataset.play);$("#au").src=src(t.audio);$("#pt").textContent=t.title;$("#player").style.display="flex";$("#au").play()}
+  if(!admin)return;
+  if(b.dataset.edit)trackForm(b.dataset.edit);
+  if(b.dataset.rm&&confirm("Delete this track?")){const t=S.tracks.find(x=>x.id===b.dataset.rm);run(async()=>{S.tracks=S.tracks.filter(x=>x.id!==t.id);await saveData();await del(t.audio)})}
+};
+$("#pc").onclick=()=>{$("#au").pause();$("#player").style.display="none"};
+
+loadPublic().then(render);
+</script>
+</body>
+</html>
