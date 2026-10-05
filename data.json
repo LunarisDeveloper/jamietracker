@@ -1,0 +1,30 @@
+{
+ "sections": [
+  {
+   "id": "a",
+   "name": "Unreleased"
+  },
+  {
+   "id": "b",
+   "name": "Released"
+  }
+ ],
+ "albums": [],
+ "tracks": [
+  {
+   "id": "qz5uleyz",
+   "sec": "a",
+   "audio": "media/qz5uleyz-1791235883284.wav",
+   "audioName": "liquorblues.wav",
+   "title": "liquorblues",
+   "sub": "Snippet",
+   "album": "",
+   "avail": "",
+   "quality": "",
+   "length": "0:08",
+   "date": "10/3/26",
+   "notes": "",
+   "link": ""
+  }
+ ]
+}
